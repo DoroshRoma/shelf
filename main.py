@@ -3,30 +3,21 @@
 
 from mess import Request, Response, Router, NotFound
 from wsgiref.simple_server import make_server
-#
-import psycopg2
-conn = psycopg2.connect(dbname='postgres', user='postgres',
-                        password='password123', host='localhost')
+from db import MedicDB
 
-cursor = conn.cursor()
-table = "Patients"
-cursor.execute(f'SELECT * FROM "{table}"')
-
-records = cursor.fetchall()
-
-cursor.close()
-conn.close()
-#
 
 def patients(request):
     # Get all patients from db
-    
-    #name = request.args.get('name', 'Guest')
+    password = 'password123'
+    medicdb = MedicDB(password)
+    print(medicdb.get_all_from_table('Patients'))
+
+    name = request.args.get('name', 'Guest')
     return Response(f"<h1>Hello, {name}</h1>")
 
 routes = Router()
-routes.add_route('/patients', hello)
-routes.add_route('/', hello)
+routes.add_route('/patients', patients)
+routes.add_route('/', patients)
 
 def app(environ, start_response):
     try:
