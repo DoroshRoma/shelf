@@ -20,3 +20,19 @@ class Doctor:
     name: str = None
     patronymic: str = None
     doctor_spec: str = None
+
+@dataclass
+class Desease:
+    id: int = None
+    name: str = None
+    category: str = None
+    description: str = None
+
+@dataclass
+class History:
+    id: int = None
+    start: date = None
+    end: date = None
+    description: str = None
+    patient_id: int = None
+    presc_id: int = None

@@ -28,7 +28,10 @@ def patients(request):
                     <h2>Patient information</h2>
                    """
         try:
-            patient = medicdb.get_patient_by_id(int(patient_id))
+            id = int(patient_id)
+            patient = medicdb.get_patient_by_id(id)
+            deseases = medicdb.get_deseases(id)
+            history = medicdb.get_history(id)
             response += f'''<p>
                                 <b>{patient.name} {patient.surname}</b>
                                 <b>{patient.patronymic}</b>
@@ -36,11 +39,41 @@ def patients(request):
                             <p>
                             <span>System ID</span>
                             <span>{patient.patient_id}</span>
-                            </p>
-                            <p>
-                                <a href='/doctors?patient_id={patient_id}'>Patient Doctors</a>
+                            </p> 
+                        '''
+            response += f'''<p>
+                                <a href='/doctors?patient_id={patient_id}'>Current Therapists</a>
                             </p>
                         '''
+            # Add patient deseases
+            if len(deseases):   
+                desease_list = "<ol><b>Deseases</b>" 
+                for desease in deseases:
+                    desease_list += f"""<li>{desease.name}</li>"""
+                desease_list += "</ol>"
+                response += desease_list
+            # Add desease history
+            if len(history):
+                response += "<h4>Records in desease history</h4>"
+                for record in history:  
+                    history_table = "<p><table border='1'>"
+                    history_table += f"""<tr>
+                                        <td>Start</td>
+                                        <td>{record.start}</td>
+                                        </tr>
+                                        <tr>
+                                        <td>End</td>
+                                        <td>{record.end}</td>
+                                        </tr>
+                                        <tr>
+                                        <td>Description</td>
+                                        <td>{record.description}</td>
+                                        </tr>
+                                        """
+                    history_table += "</table></p>"
+
+                    response += history_table
+
         except NotFound:
             response = "<h3>You are looking for wrong patient!</h3>"
 
@@ -86,10 +119,13 @@ def doctors(request):
                     <ul>"""
         try:
             doctors = medicdb.get_doctors_for_patient(patient_id)
-            # Display doctors
-            for doctor in doctors:
-                response += f'<a href="/doctors?id={doctor.doctor_id}"><li>{doctor.surname} {doctor.name} {doctor.patronymic}</li></a>'
-            response += '</ul>'
+            if doctors:
+                # Display doctors
+                for doctor in doctors:
+                    response += f'<a href="/doctors?id={doctor.doctor_id}"><li>{doctor.surname} {doctor.name} {doctor.patronymic}</li></a>'
+                response += '</ul>'
+            else:
+                response = "<h3>No doctors for this patient</h3>"
         except NotFound:
             response = "<h3>No therapist</h3>"
 

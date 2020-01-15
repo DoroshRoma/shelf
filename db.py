@@ -1,5 +1,5 @@
 import psycopg2
-from models import Patient, Doctor
+from models import Patient, Doctor, Desease, History
 from mess import NotFound
 
 class MedicDB(object): 
@@ -61,6 +61,38 @@ class MedicDB(object):
 
         return self._parse_doctors(records)
     
+    def get_deseases(self, patient_id):
+        self.cursor.execute(f'''
+                             select des.* from "Deseases" as des join "Patient_Desease" as pd
+                             using(desease_id) join "Patients" using(patient_id) where patient_id={patient_id};
+                            ''')
+        records = self.cursor.fetchall()
+        if records is None:
+            raise NotFound()
+        return self._parse_deseases(records)
+    
+    def get_history(self, patient_id):
+        self.cursor.execute(f'''
+                            select * from "History" where patient_id={patient_id};
+                            ''')
+        records = self.cursor.fetchall()
+        if records is None:
+            raise NotFound()
+        
+        return self._parse_history(records)
+
+    def _parse_history(self, records):
+        for i in range(len(records)):
+            id, start, end, description, patient_id, presc_id = records[i]
+            records[i] = History(id, start, end, description, patient_id, presc_id)
+        return records
+
+    def _parse_deseases(self, records):
+        for i in range(len(records)):
+            id, name, category, description = records[i]
+            records[i] = Desease(id, name, category, description)
+        return records
+
     def _parse_patients(self, records):
         if not isinstance(records, list):
             name, patient_id, patronymic, surname, gender, birth_date, mobile_number, place, address = records
@@ -80,7 +112,7 @@ class MedicDB(object):
                 doctor_id, surname, name, patronymic, doctor_spec = records[i] 
                 records[i] = Doctor(doctor_id, surname, name, patronymic, doctor_spec)
         return records
-
+    
     def disconnect(self):
         self.cursor.close()
         self.conn.close()
