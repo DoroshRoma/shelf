@@ -37,7 +37,9 @@ def patients(request):
                             <span>System ID</span>
                             <span>{patient.patient_id}</span>
                             </p>
-                            
+                            <p>
+                                <a href='/doctors?patient_id={patient_id}'>Patient Doctors</a>
+                            </p>
                         '''
         except NotFound:
             response = "<h3>You are looking for wrong patient!</h3>"
@@ -55,6 +57,7 @@ def doctors(request):
         response += '</ul>'
     except NotFound:
         response = "<h3>No Doctors!</h3>"
+    
     # Render patient page
     doctor_id = request.args.get('id')
     if doctor_id is not None:
@@ -75,6 +78,20 @@ def doctors(request):
                         '''
         except NotFound:
             response = "<h3>You are looking for wrong doctor!</h3>"
+
+    # Render doctors page for patient
+    patient_id = request.args.get('patient_id')
+    if patient_id is not None:
+        response = """<h2>All Doctors</h2>
+                    <ul>"""
+        try:
+            doctors = medicdb.get_doctors_for_patient(patient_id)
+            # Display doctors
+            for doctor in doctors:
+                response += f'<a href="/doctors?id={doctor.doctor_id}"><li>{doctor.surname} {doctor.name} {doctor.patronymic}</li></a>'
+            response += '</ul>'
+        except NotFound:
+            response = "<h3>No therapist</h3>"
 
     return Response(response)
 
