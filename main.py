@@ -6,7 +6,7 @@ from wsgiref.simple_server import make_server
 from db import MedicDB
 
 PASSWORD = 'password123'
-
+passwd = 'pass'
 def patients(request):
     # Get all patients from db
     medicdb = MedicDB(PASSWORD)
