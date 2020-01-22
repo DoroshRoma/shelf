@@ -136,8 +136,6 @@ def doctors(request):
 routes = Router()
 
 routes.add_route('/patients', patients)
-routes.add_route('/', patients)
-
 routes.add_route('/doctors', doctors)
 
 # entry point to WSGI app
